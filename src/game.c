@@ -2182,6 +2182,9 @@ MenuLevel(VOID)
         {
         handleevents();
         OSD_DispatchQueued();
+#ifdef MISTER_HYBRID
+        MiSTer_UpdateOptions();
+#endif
 
         if (quitevent)
             {
@@ -3130,6 +3133,9 @@ RunLevel(VOID)
         {
         handleevents();
         OSD_DispatchQueued();
+#ifdef MISTER_HYBRID
+        MiSTer_UpdateOptions();
+#endif
 
         if (quitevent)
             {
@@ -3539,7 +3545,7 @@ int app_main(int argc, char const * const argv[])
     // The screen of the core
     ScreenMode = 0;
     ScreenDisplay = 0;
-    ScreenWidth = 320;
+    ScreenWidth = MiSTer_ScreenWidth();
     ScreenHeight = 200;
     ScreenBPP = 8;
     MiSTer_Loading();

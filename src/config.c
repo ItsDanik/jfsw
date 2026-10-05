@@ -259,6 +259,11 @@ void CONFIG_SetDefaults( void )
       CONTROL_SetJoyAxisDead(i, JoystickAnalogDead[i]);
       CONTROL_SetJoyAxisSaturate(i, JoystickAnalogSaturate[i]);
    }
+#ifdef MISTER_HYBRID
+   // right stick: up looks up
+   JoystickAnalogScale[3] = -65536;
+   CONTROL_SetAnalogAxisScale( 3, JoystickAnalogScale[3], controldevice_joystick );
+#endif
 }
 
 

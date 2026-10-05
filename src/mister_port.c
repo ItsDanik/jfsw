@@ -15,6 +15,29 @@
 
 static const char *const TITLE = "jfSW";
 
+// OSD options of the game: CONF_STR in core/jfSW.sv, status bits 24..63
+int MiSTer_ScreenWidth(void)
+{
+    // 320x200 as well when there is no core to ask
+    return MH_IsOpen() && MH_OSD_GAME_BITS(MH_OSDStatus(), 24, 1) ? 640 : 320;
+}
+
+int MiSTer_StickSensitivity(int stick)
+{
+    static const int percent[8] = { 100, 125, 150, 200, 300, 25, 50, 75 };
+    return percent[MH_OSD_GAME_BITS(MH_OSDStatus(), stick ? 28 : 25, 3)];
+}
+
+void MiSTer_HorizLimits(int centre, int *min, int *max)
+{
+    const int divisor = 1 + MH_OSD_GAME_BITS(MH_OSDStatus(), 31, 2);
+
+    if (divisor > 1) {
+        *min = centre - (centre - *min) / divisor;
+        *max = centre + (*max - centre) / divisor;
+    }
+}
+
 // The player came through the list: quitting a game goes back to it
 static int PickedFromList = 0;
 

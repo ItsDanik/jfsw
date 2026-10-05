@@ -55,6 +55,8 @@ Prepared for public release: 03/28/2005 - Charlie Wiederhold, 3D Realms
 #include "sector.h"
 #ifdef MISTER_HYBRID
 #include "sdlayer.h"
+#include "config.h"
+#include "mister_port.h"
 #endif
 
 static int OverlapDraw = FALSE;
@@ -1566,6 +1568,36 @@ void VideoRestart(void)
     SetRedrawScreen(Player + myconnectindex);
     MNU_UpdateVideoSliders();
     }
+
+#ifdef MISTER_HYBRID
+void MiSTer_UpdateOptions(void)
+    {
+    extern int32 ScreenWidth;
+    static int lastwidth;
+    int width = MiSTer_ScreenWidth();
+    int i;
+
+    // Resolution: the core follows the size of the window. Tried once for
+    // every change of the option.
+    if (width != xdim && width != lastwidth)
+        {
+        int oldwidth = xdim;
+
+        if (COVERsetgamemode(SETGAMEMODE_FULLSCREEN(0, 0), width, ydim, 8) < 0)
+            ScreenWidth = oldwidth;
+        SetupAspectRatio();
+        SetRedrawScreen(Player + myconnectindex);
+        MNU_UpdateVideoSliders();
+        }
+    lastwidth = width;
+
+    // Stick sensitivity: on top of the scale of each axis set in the game's
+    // own menu. Axes 0 and 1 are the left stick, 2 and 3 the right one.
+    for (i = 0; i < 4; i++)
+        CONTROL_SetAnalogAxisScale(i, (int32)((int64_t)JoystickAnalogScale[i] * MiSTer_StickSensitivity(i >> 1) / 100),
+            controldevice_joystick);
+    }
+#endif
 
 #if 0
 void CheatResChange(void)

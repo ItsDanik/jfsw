@@ -61,6 +61,9 @@ Prepared for public release: 03/28/2005 - Charlie Wiederhold, 3D Realms
 #include "vis.h"
 #include "track.h"
 #include "interp.h"
+#ifdef MISTER_HYBRID
+#include "mister_port.h"
+#endif
 
 
 #define SO_DRIVE_SOUND 2
@@ -1860,7 +1863,14 @@ VOID
 DoPlayerHorizon(PLAYERp pp)
     {
     int i;
+    int horizmin = PLAYER_HORIZ_MIN, horizmax = PLAYER_HORIZ_MAX;
     #define HORIZ_SPEED (16)
+
+#ifdef MISTER_HYBRID
+    // OSD option. Not for demos: they were recorded with the game's limits
+    if (!DemoMode)
+        MiSTer_HorizLimits(100, &horizmin, &horizmax);
+#endif
 
 //    //DSPRINTF(ds,"pp->horizoff, %d", pp->horizoff);
 //    MONO_PRINT(ds);
@@ -1945,15 +1955,15 @@ DoPlayerHorizon(PLAYERp pp)
 
     #if 1
     // bound the base
-    pp->horizbase = max(pp->horizbase, PLAYER_HORIZ_MIN);
-    pp->horizbase = min(pp->horizbase, PLAYER_HORIZ_MAX);
+    pp->horizbase = max(pp->horizbase, horizmin);
+    pp->horizbase = min(pp->horizbase, horizmax);
 
     // bound adjust horizoff
-    if (pp->horizbase + pp->horizoff < PLAYER_HORIZ_MIN)
-        pp->horizoff = PLAYER_HORIZ_MIN - pp->horizbase;
+    if (pp->horizbase + pp->horizoff < horizmin)
+        pp->horizoff = horizmin - pp->horizbase;
     else
-    if (pp->horizbase + pp->horizoff > PLAYER_HORIZ_MAX)
-        pp->horizoff = PLAYER_HORIZ_MAX - pp->horizbase;
+    if (pp->horizbase + pp->horizoff > horizmax)
+        pp->horizoff = horizmax - pp->horizbase;
 
     ////DSPRINTF(ds,"base %d, off %d, base + off %d",pp->horizbase, pp->horizoff, pp->horizbase + pp->horizoff);
     //MONO_PRINT(ds);

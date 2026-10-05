@@ -12,6 +12,19 @@
 extern "C" {
 #endif
 
+// OSD options of the game (CONF_STR in core/jfSW.sv of jfSW_MiSTer). The first
+// entry of each is 0, the default.
+// Resolution: 320 or 640, always 200 lines
+int MiSTer_ScreenWidth(void);
+// Left (0) and right (1) stick sensitivity in percent
+int MiSTer_StickSensitivity(int stick);
+// Limit Vertical Look: narrows the range of the horizon around its centre to
+// a half, a third or a quarter. Leaves the game's own limits when it is off
+void MiSTer_HorizLimits(int centre, int *min, int *max);
+// Once per frame, between two frames: follows the OSD options that apply
+// while the game runs (draw.c)
+void MiSTer_UpdateOptions(void);
+
 // In app_main(), before the engine is started
 void MiSTer_Init(void);
 // The folders of a copy of "Shadow Warrior Classic Redux" (Steam, GOG) that
