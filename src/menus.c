@@ -2686,6 +2686,43 @@ MNU_InputString(char *name, short pix_width)
 #define ascii_esc 27
 #define ascii_return 13
 
+#ifdef MISTER_HYBRID
+    // Without a keyboard: up and down change the last letter, right adds a
+    // letter and left removes one. Menu OK accepts and Menu Back cancels,
+    // as the buttons do below.
+        {
+        static const char letters[] = " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        size_t len = strlen(name);
+        const char *at = len > 0 ? strchr(letters, toupper((unsigned char)name[len - 1])) : NULL;
+        int n = at && *at ? (int)(at - letters) : 0;
+
+        switch (mnu_input.dir)
+            {
+        case dir_North:
+        case dir_South:
+            if (len == 0)
+                break;
+            n += mnu_input.dir == dir_North ? 1 : (int)sizeof(letters) - 2;
+            name[len - 1] = letters[n % ((int)sizeof(letters) - 1)];
+            break;
+        case dir_East:
+            MNU_MeasureString(name, &w, &h);
+            if (w < pix_width && len < 79)
+                {
+                name[len] = 'A';
+                name[len + 1] = 0;
+                }
+            break;
+        case dir_West:
+            if (len > 0)
+                name[len - 1] = 0;
+            break;
+        default:
+            break;
+            }
+        }
+#endif
+
     while (KB_KeyWaiting())
         {
         ch = KB_Getch();

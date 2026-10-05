@@ -58,6 +58,9 @@ Things required to make savegames work:
 #include "player.h"
 #include "lists.h"
 #include "net.h"
+#ifdef MISTER_HYBRID
+#include "mister_port.h"
+#endif
 #include "pal.h"
 #include "fx_man.h"
 
@@ -3417,11 +3420,20 @@ int app_main(int argc, char const * const argv[])
     // creating a 'user_profiles_disabled' file in the current working
     // directory where the game was launched makes the installation
     // "portable" by writing into the working directory
+#ifdef MISTER_HYBRID
+    // The game data, the settings and the saved games are all in the
+    // directory the launcher starts the game in
+    if (1) {
+#else
     if (access("user_profiles_disabled", F_OK) == 0) {
+#endif
         char cwd[BMAX_PATH+1];
         if (getcwd(cwd, sizeof(cwd))) {
             addsearchpath(cwd);
         }
+#ifdef MISTER_HYBRID
+        MiSTer_AddSearchPaths();
+#endif
     } else {
         char *supportdir;
         char dirpath[BMAX_PATH+1];
@@ -3449,7 +3461,12 @@ int app_main(int argc, char const * const argv[])
         }
     }
 
+#ifdef MISTER_HYBRID
+    // the launcher keeps what the game prints
+    MiSTer_Init();
+#else
     buildsetlogfile("sw.log");
+#endif
 
     OSD_SetFunctions(
         NULL, NULL, NULL, NULL, NULL,
@@ -3518,8 +3535,21 @@ int app_main(int argc, char const * const argv[])
         strncpy(grpfile, getenv("SWGRP"), BMAX_PATH);
     }
 
+#ifdef MISTER_HYBRID
+    // The screen of the core
+    ScreenMode = 0;
+    ScreenDisplay = 0;
+    ScreenWidth = 320;
+    ScreenHeight = 200;
+    ScreenBPP = 8;
+    MiSTer_Loading();
+#endif
+
     ScanGroups();
     gamegrp = IdentifyGroup(grpfile);
+#ifdef MISTER_HYBRID
+    gamegrp = MiSTer_SelectGroup(gamegrp);
+#endif
 
     if (netparam) { // -net parameter on command line.
         netsuccess = initmultiplayersparms(endnetparam - netparam, &argv[netparam]);
@@ -3614,7 +3644,15 @@ int app_main(int argc, char const * const argv[])
         }
 
     buildprintf("GRP file: %s\n", grpfile);
+#ifdef MISTER_HYBRID
+    if (initgroupfile(grpfile) < 0)
+        {
+        MiSTer_NoGameData();
+        exit(0);
+        }
+#else
     initgroupfile(grpfile);
+#endif
     if (!gamegrp && !DetectShareware()) {
         if (SW_SHAREWARE) {
             buildputs("Detected shareware GRP\n");

@@ -53,6 +53,9 @@ Prepared for public release: 03/28/2005 - Charlie Wiederhold, 3D Realms
 #include "menus.h"
 #include "interp.h"
 #include "sector.h"
+#ifdef MISTER_HYBRID
+#include "sdlayer.h"
+#endif
 
 static int OverlapDraw = FALSE;
 extern BOOL QuitFlag, LocationInfo, ConPanel, SpriteInfo, PauseKeySet;
@@ -2333,7 +2336,13 @@ drawscreen(PLAYERp pp)
     PreUpdatePanel();
 
 
+#ifdef MISTER_HYBRID
+    // A field of the core is 2.01 ticks: the part of a tick counts, or every
+    // frame would be drawn a different time after the one before
+    smoothratio = min(max(((totalclock - ototalclock) * 65536 + gettimerfraction()) / synctics,0),65536);
+#else
     smoothratio = min(max((totalclock - ototalclock) * (65536 / synctics),0),65536);
+#endif
 
     if (!ScreenSavePic)
         {

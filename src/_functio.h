@@ -351,6 +351,76 @@ static char * joystickdefaults_modern[MAXJOYBUTTONS] =
    };
 
 
+#ifdef MISTER_HYBRID
+// MiSTer hybrid core: the buttons as the engine lays them out (MISTERJOY_* in
+// sdlayer.h). The eight actions are the "J1," list of the core (jfSW.sv of
+// jfSW_MiSTer) in its order.
+static char * joystickdefaults_mister[MAXJOYBUTTONS] =
+   {
+   "",            // Menu OK: confirms in menus
+   "",            // Menu Back: goes back in menus
+   "Fire",
+   "Open",
+   "Jump",
+   "Crouch",
+   "Next_Weapon",
+   "Inventory",
+   "Map",
+   "Show_Menu",
+   "",
+   "Move_Forward",  // d-pad up
+   "Move_Backward", // d-pad down
+   "Turn_Left",     // d-pad left
+   "Turn_Right",    // d-pad right
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   };
+
+static char * joystickdigitaldefaults_mister[MAXJOYAXES*2] =
+   {
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   };
+#endif
+
+
 static char * joystickclickeddefaults_modern[MAXJOYBUTTONS] =
    {
    "",            // A

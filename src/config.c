@@ -324,6 +324,15 @@ void CONFIG_SetJoystickDefaults(int style)
    char **joydigitaldefaultset, **joyanalogdefaultset;
    int i;
 
+#ifdef MISTER_HYBRID
+   // one layout: the buttons of the core, in both styles
+   if (1) {
+      joydefaultset = joystickdefaults_mister;
+      joyclickeddefaultset = joystickclickeddefaults_modern;
+      joydigitaldefaultset = joystickdigitaldefaults_mister;
+      joyanalogdefaultset = joystickanalogdefaults_modern;
+   } else
+#endif
    if (style) {
       joydefaultset = joystickdefaults_modern;
       joyclickeddefaultset = joystickclickeddefaults_modern;
