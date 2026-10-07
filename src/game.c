@@ -3546,7 +3546,7 @@ int app_main(int argc, char const * const argv[])
     ScreenMode = 0;
     ScreenDisplay = 0;
     ScreenWidth = MiSTer_ScreenWidth();
-    ScreenHeight = 200;
+    ScreenHeight = MiSTer_ScreenHeight();
     ScreenBPP = 8;
     MiSTer_Loading();
 #endif
@@ -5078,6 +5078,8 @@ getinput(SW_PACKET *loc)
     // MAKE SURE THIS WILL GET SET
     SET_LOC_KEY(loc->bits, SK_QUIT_GAME, MultiPlayQuitFlag);
 
+#ifndef MISTER_HYBRID
+    // MiSTer: the mouse always looks, the Mouse_Aiming function does nothing
     if (gs.MouseAimingType == 1) // while held
         {
         if (BUTTON(gamefunc_Mouse_Aiming))
@@ -5113,8 +5115,14 @@ getinput(SW_PACKET *loc)
                 }
             }
         }
+#endif
 
+#ifdef MISTER_HYBRID
+    // the mouse always looks up and down, as the right stick does
+    if (1)
+#else
     if (TEST(pp->Flags, PF_MOUSE_AIMING_ON))
+#endif
         {
         mouseaxis = analog_lookingupanddown;
         }

@@ -114,7 +114,12 @@ VOID SetCrosshair(VOID)
     y = windowy1 + wdy;
 
     CrosshairX = x / (xdim/320.0);
+#ifdef MISTER_HYBRID
+    // MiSTer: the 200 lines of the 2D art are in the middle of the screen
+    CrosshairY = y - (ydim - 200) / 2;
+#else
     CrosshairY = y / (ydim/200.0);
+#endif
 
     // rotatesprite takes FIXED point number
     CrosshairX <<= 16;
@@ -132,7 +137,14 @@ SetupAspectRatio(VOID)
     y_pix_size = (f_200 / ydim);
 
     x_aspect_mul = (f_xdim / 320);
+#ifdef MISTER_HYBRID
+    // MiSTer: the 2D art is not stretched over a screen of more than 200
+    // lines (dorotatesprite() of the engine), the status bar is as high as
+    // it was drawn
+    y_aspect_mul = FIXED(1, 0);
+#else
     y_aspect_mul = (f_ydim / 200);
+#endif
     }
 
 VOID
@@ -199,7 +211,10 @@ SetFragBar(PLAYERp pp)
     for (i = windowx1; i <= windowx2; i++)
         {
         y = (tilesizy[FRAG_BAR] * num_frag_bars) - (2 * (num_frag_bars-1));
+#ifndef MISTER_HYBRID
+        // MiSTer: the frag bar is at the top of the screen, not stretched
         y = y * (ydim/200.0);
+#endif
 
         if (windowy1 < y)
             startumost[i] = y;

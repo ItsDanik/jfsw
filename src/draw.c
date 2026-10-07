@@ -1433,7 +1433,12 @@ VOID SecretInfo(PLAYERp pp)
         return;
 
     x = x / (xdim/320.0);
+#ifdef MISTER_HYBRID
+    // MiSTer: the 200 lines of the 2D art are in the middle of the screen
+    y = y - (ydim - 200) / 2;
+#else
     y = y / (ydim/200.0);
+#endif
 
     if (gs.Stats)
         {
@@ -1572,30 +1577,65 @@ void VideoRestart(void)
 #ifdef MISTER_HYBRID
 void MiSTer_UpdateOptions(void)
     {
-    extern int32 ScreenWidth;
-    static int lastwidth;
+    extern int32 ScreenWidth, ScreenHeight;
+    static int lastwidth, lastheight;
     int width = MiSTer_ScreenWidth();
+    int height = MiSTer_ScreenHeight();
     int i;
 
     // Resolution: the core follows the size of the window. Tried once for
     // every change of the option.
-    if (width != xdim && width != lastwidth)
+    if ((width != xdim || height != ydim) && (width != lastwidth || height != lastheight))
         {
-        int oldwidth = xdim;
+        int oldwidth = xdim, oldheight = ydim;
 
-        if (COVERsetgamemode(SETGAMEMODE_FULLSCREEN(0, 0), width, ydim, 8) < 0)
+        if (COVERsetgamemode(SETGAMEMODE_FULLSCREEN(0, 0), width, height, 8) < 0)
+            {
             ScreenWidth = oldwidth;
+            ScreenHeight = oldheight;
+            }
+        else
+            {
+            // what is on the screen for longer (messages) was clipped to the
+            // old screen
+            PLAYERp pp = Player + myconnectindex;
+            PANEL_SPRITEp psp, next;
+
+            if (pp->PanelSpriteList.Next)
+                {
+                for (psp = pp->PanelSpriteList.Next; (void *)psp != (void *)&pp->PanelSpriteList; psp = next)
+                    {
+                    next = psp->Next;
+                    if (TEST(psp->flags, PANF_STATUS_AREA) && psp->x1 == 0 && psp->y1 == 0 &&
+                        psp->x2 == oldwidth - 1 && psp->y2 == oldheight - 1)
+                        {
+                        psp->x2 = xdim - 1;
+                        psp->y2 = ydim - 1;
+                        }
+                    }
+                }
+            }
         SetupAspectRatio();
         SetRedrawScreen(Player + myconnectindex);
         MNU_UpdateVideoSliders();
         }
     lastwidth = width;
+    lastheight = height;
 
-    // Stick sensitivity: on top of the scale of each axis set in the game's
-    // own menu. Axes 0 and 1 are the left stick, 2 and 3 the right one.
+    // Stick sensitivity: the scale of each axis. The game's own menu only has
+    // its direction ("Invert"). Axes 0 and 1 are the left stick, 2 and 3 the
+    // right one.
     for (i = 0; i < 4; i++)
-        CONTROL_SetAnalogAxisScale(i, (int32)((int64_t)JoystickAnalogScale[i] * MiSTer_StickSensitivity(i >> 1) / 100),
+        CONTROL_SetAnalogAxisScale(i, (JoystickAnalogScale[i] < 0 ? -65536 : 65536) * MiSTer_StickSensitivity(i >> 1) / 100,
             controldevice_joystick);
+    // The mouse looks up and down (getinput() in game.c): moving it up looks
+    // up, whatever the sign of the scale in sw.cfg. "Mouse Invert" of the
+    // game's menu turns it around, with the right stick.
+    CONTROL_SetAnalogAxisScale(1, -abs(MouseAnalogScale[1]), controldevice_mouse);
+
+    // The left stick moves the player as an axis: its d-pad presses (turning,
+    // at a full tilt) only count in menus.
+    setjoystickdpad(UsingMenus);
     }
 #endif
 

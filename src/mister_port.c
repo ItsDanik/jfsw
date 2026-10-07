@@ -12,29 +12,54 @@
 
 #define EXIT_TO_MENU 0
 #define EXIT_RESTART 42 // danik_hybrid_launch.sh starts the game again
+#define EXIT_RELOADED 43 // the same, after the core has settled
 
 static const char *const TITLE = "jfSW";
 
 // OSD options of the game: CONF_STR in core/jfSW.sv, status bits 24..63
+
+// Resolution: the video mode of the core. One the core does not have (an
+// older core) is the one of 200 lines, which every core has; 320x200 as well
+// when there is no core to ask.
+static int ScreenMode(void)
+{
+    static const int option[4] = { MH_MODE_320x200, MH_MODE_640x200, MH_MODE_320x240, MH_MODE_640x240 };
+    int mode;
+
+    if (!MH_IsOpen())
+        return MH_MODE_320x200;
+    mode = option[MH_OSD_GAME_BITS(MH_OSDStatus(), 24, 2)];
+    if (!MH_ModeAvailable(mode))
+        mode = MH_ModeWidth(mode) == 640 ? MH_MODE_640x200 : MH_MODE_320x200;
+    return mode;
+}
+
 int MiSTer_ScreenWidth(void)
 {
-    // 320x200 as well when there is no core to ask
-    return MH_IsOpen() && MH_OSD_GAME_BITS(MH_OSDStatus(), 24, 1) ? 640 : 320;
+    return MH_ModeWidth(ScreenMode());
+}
+
+int MiSTer_ScreenHeight(void)
+{
+    return MH_ModeHeight(ScreenMode());
 }
 
 int MiSTer_StickSensitivity(int stick)
 {
     static const int percent[8] = { 100, 125, 150, 200, 300, 25, 50, 75 };
-    return percent[MH_OSD_GAME_BITS(MH_OSDStatus(), stick ? 28 : 25, 3)];
+    const int option = percent[MH_OSD_GAME_BITS(MH_OSDStatus(), stick ? 29 : 26, 3)];
+
+    // The whole axis walks at the speed of the keys but turns nearly four
+    // times as fast as they do: 100% of the right stick is a quarter of it,
+    // the turning speed of the keys when running
+    return stick ? option / 4 : option;
 }
 
 void MiSTer_HorizLimits(int centre, int *min, int *max)
 {
-    const int divisor = 1 + MH_OSD_GAME_BITS(MH_OSDStatus(), 31, 2);
-
-    if (divisor > 1) {
-        *min = centre - (centre - *min) / divisor;
-        *max = centre + (*max - centre) / divisor;
+    if (MH_OSD_GAME_BITS(MH_OSDStatus(), 32, 1)) {
+        *min = centre - (centre - *min) / 2;
+        *max = centre + (*max - centre) / 2;
     }
 }
 
@@ -141,6 +166,9 @@ void MiSTer_Init(void)
 
 int MiSTer_ExitCode(void)
 {
+    // The player loaded the core again while the game ran
+    if (MH_CoreReloaded())
+        return EXIT_RELOADED;
     // Not if we are quitting because another core was loaded
     if (PickedFromList && MH_Open())
         return EXIT_RESTART;

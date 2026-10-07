@@ -268,6 +268,15 @@ DisplayPanelNumber(PLAYERp pp, short xs, short ys, int number)
         }
     }
 
+#ifdef MISTER_HYBRID
+// MiSTer: ROTATESPRITE_BOTTOM while the mini bar is drawn, which is at the
+// bottom of a screen of more than 200 lines. Everything else these functions
+// write is in its middle.
+int MiniBarRotateFlags = 0;
+#else
+#define MiniBarRotateFlags 0
+#endif
+
 VOID
 DisplayMiniBarNumber(PLAYERp pp, short xs, short ys, int number)
     {
@@ -292,7 +301,7 @@ DisplayMiniBarNumber(PLAYERp pp, short xs, short ys, int number)
 
         rotatesprite((int)x << 16, (int)ys << 16, (1 << 16), 0,
             pic, 0, 0,
-            ROTATE_SPRITE_SCREEN_CLIP | ROTATE_SPRITE_CORNER, 0, 0, xdim - 1, ydim - 1);
+            ROTATE_SPRITE_SCREEN_CLIP | ROTATE_SPRITE_CORNER | MiniBarRotateFlags, 0, 0, xdim - 1, ydim - 1);
 
         size = tilesizx[PANEL_FONT_G + (*ptr - '0')] + 1;
         }
@@ -321,9 +330,22 @@ DisplayMiniBarSmString(PLAYERp pp, short xs, short ys, short pal, const char *bu
 
         rotatesprite((int)x << 16, (int)ys << 16, (1 << 16), 0,
             pic, 0, pal,
-            ROTATE_SPRITE_SCREEN_CLIP | ROTATE_SPRITE_CORNER, 0, 0, xdim - 1, ydim - 1);
+            ROTATE_SPRITE_SCREEN_CLIP | ROTATE_SPRITE_CORNER | MiniBarRotateFlags, 0, 0, xdim - 1, ydim - 1);
         }
     }
+
+#ifdef MISTER_HYBRID
+// in the mini bar
+VOID
+DisplayMiniBarSmStringBottom(PLAYERp pp, short xs, short ys, short pal, const char *buffer)
+    {
+    int flags = MiniBarRotateFlags;
+
+    MiniBarRotateFlags = ROTATESPRITE_BOTTOM;
+    DisplayMiniBarSmString(pp, xs, ys, pal, buffer);
+    MiniBarRotateFlags = flags;
+    }
+#endif
 
 VOID
 DisplaySmString(PLAYERp pp, short xs, short ys, short pal, const char *buffer)

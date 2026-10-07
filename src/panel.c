@@ -7426,6 +7426,10 @@ pDisplaySprites(PLAYERp pp)
                 sc = mulscale16(sc, PanelScale);
                 x = (160l<<16) - mulscale16((160l<<16) - x, PanelScale);
                 y = mulscale16(y, PanelScale);
+#ifdef MISTER_HYBRID
+                // MiSTer: at the top of a screen of more than 200 lines
+                SET(flags, ROTATESPRITE_TOP);
+#endif
                 }
             else
             if (TEST(psp->flags, PANF_SCALE_BOTTOM))
@@ -7433,6 +7437,10 @@ pDisplaySprites(PLAYERp pp)
                 sc = mulscale16(sc, PanelScale);
                 x = (160l<<16) - mulscale16((160l<<16) - x, PanelScale);
                 y = (200l<<16) - mulscale16((200l<<16) - y, PanelScale);
+#ifdef MISTER_HYBRID
+                // MiSTer: at the bottom of a screen of more than 200 lines
+                SET(flags, ROTATESPRITE_BOTTOM);
+#endif
                 }
 
             x1 = psp->x1;

@@ -303,7 +303,12 @@ void CONFIG_SetMouseDefaults(int style)
    if (style) {
       mousedefaultset = mousedefaults_modern;
       mouseclickeddefaultset = mouseclickeddefaults_modern;
+#ifdef MISTER_HYBRID
+      // up already looks up (MiSTer_UpdateOptions() in draw.c)
+      gs.MouseInvert = 0;
+#else
       gs.MouseInvert = 1;
+#endif
    } else {
       mousedefaultset = mousedefaults;
       mouseclickeddefaultset = mouseclickeddefaults;

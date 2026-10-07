@@ -14,12 +14,13 @@ extern "C" {
 
 // OSD options of the game (CONF_STR in core/jfSW.sv of jfSW_MiSTer). The first
 // entry of each is 0, the default.
-// Resolution: 320 or 640, always 200 lines
+// Resolution: 320 or 640 wide, 200 or 240 lines
 int MiSTer_ScreenWidth(void);
-// Left (0) and right (1) stick sensitivity in percent
+int MiSTer_ScreenHeight(void);
+// Left (0) and right (1) stick sensitivity, in percent of the whole axis
 int MiSTer_StickSensitivity(int stick);
 // Limit Vertical Look: narrows the range of the horizon around its centre to
-// a half, a third or a quarter. Leaves the game's own limits when it is off
+// a half. Leaves the game's own limits when it is off
 void MiSTer_HorizLimits(int centre, int *min, int *max);
 // Once per frame, between two frames: follows the OSD options that apply
 // while the game runs (draw.c)
@@ -48,7 +49,8 @@ int MiSTer_PickGame(const char *const *names, int count, int selected);
 // button is pressed, in plain words that say which files go where
 void MiSTer_ShowError(const char *message);
 // Exit code of the process after the player quit: the launcher starts the
-// game again (back to the list of MiSTer_PickGame) or returns to the menu
+// game again (back to the list of MiSTer_PickGame, or because the core was
+// loaded again) or returns to the menu
 int MiSTer_ExitCode(void);
 
 #ifdef __cplusplus

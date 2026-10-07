@@ -103,6 +103,15 @@ INVENTORY_DATA InventoryData[MAX_INVENTORY+1] =
 
 VOID PanelInvTestSuicide(PANEL_SPRITEp psp);
 
+#ifdef MISTER_HYBRID
+// MiSTer: the mini bar is at the bottom of a screen of more than 200 lines
+extern int MiniBarRotateFlags;
+VOID DisplayMiniBarSmStringBottom(PLAYERp pp, short xs, short ys, short pal, const char *buffer);
+#define MINI_BAR_BOTTOM ROTATESPRITE_BOTTOM
+#else
+#define MINI_BAR_BOTTOM 0
+#endif
+
 VOID UpdateMiniBar(PLAYERp pp)
     {
     USERp u = User[pp->PlayerSprite];
@@ -132,9 +141,12 @@ VOID UpdateMiniBar(PLAYERp pp)
 
     rotatesprite(x << 16, y << 16, (1 << 16), 0,
         MINI_BAR_HEALTH_BOX_PIC, 0, 0,
-        ROTATE_SPRITE_SCREEN_CLIP | ROTATE_SPRITE_CORNER, 0, 0, xdim - 1, ydim - 1);
+        ROTATE_SPRITE_SCREEN_CLIP | ROTATE_SPRITE_CORNER | MINI_BAR_BOTTOM, 0, 0, xdim - 1, ydim - 1);
 
     x = MINI_BAR_HEALTH_BOX_X+3;
+#ifdef MISTER_HYBRID
+    MiniBarRotateFlags = MINI_BAR_BOTTOM;
+#endif
     DisplayMiniBarNumber(pp, x, y+5, u->Health);
 
     if (u->WeaponNum != WPN_SWORD && u->WeaponNum != WPN_FIST)
@@ -143,11 +155,14 @@ VOID UpdateMiniBar(PLAYERp pp)
 
         rotatesprite(x << 16, y << 16, (1 << 16), 0,
             MINI_BAR_AMMO_BOX_PIC, 0, 0,
-            ROTATE_SPRITE_SCREEN_CLIP | ROTATE_SPRITE_CORNER, 0, 0, xdim - 1, ydim - 1);
+            ROTATE_SPRITE_SCREEN_CLIP | ROTATE_SPRITE_CORNER | MINI_BAR_BOTTOM, 0, 0, xdim - 1, ydim - 1);
 
         x = MINI_BAR_AMMO_BOX_X+3;
         DisplayMiniBarNumber(pp, x, y+5, pp->WpnAmmo[u->WeaponNum]);
         }
+#ifdef MISTER_HYBRID
+    MiniBarRotateFlags = 0;
+#endif
 
     if (!pp->InventoryAmount[pp->InventoryNum])
         return;
@@ -157,7 +172,7 @@ VOID UpdateMiniBar(PLAYERp pp)
 
     rotatesprite(x << 16, y << 16, (1 << 16), 0,
         MINI_BAR_INVENTORY_BOX_PIC, 0, 0,
-        ROTATE_SPRITE_SCREEN_CLIP | ROTATE_SPRITE_CORNER, 0, 0, xdim - 1, ydim - 1);
+        ROTATE_SPRITE_SCREEN_CLIP | ROTATE_SPRITE_CORNER | MINI_BAR_BOTTOM, 0, 0, xdim - 1, ydim - 1);
 
     id = &InventoryData[pp->InventoryNum];
 
@@ -167,7 +182,7 @@ VOID UpdateMiniBar(PLAYERp pp)
 
     rotatesprite(x << 16, y << 16, (1 << 16), 0,
         id->State->picndx, 0, 0,
-        ROTATE_SPRITE_SCREEN_CLIP | ROTATE_SPRITE_CORNER, 0, 0, xdim - 1, ydim - 1);
+        ROTATE_SPRITE_SCREEN_CLIP | ROTATE_SPRITE_CORNER | MINI_BAR_BOTTOM, 0, 0, xdim - 1, ydim - 1);
 
     // will update the AUTO and % inventory values
     PlayerUpdateInventory(pp, pp->InventoryNum);
@@ -1048,7 +1063,11 @@ PlayerUpdateInventory(PLAYERp pp, short InventoryNum)
         InventoryXoff = 1;
         InventoryYoff = 1;
 
+#ifdef MISTER_HYBRID
+        InventoryDisplayString = DisplayMiniBarSmStringBottom;
+#else
         InventoryDisplayString = DisplayMiniBarSmString;
+#endif
         }
     else
         {

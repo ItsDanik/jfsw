@@ -171,6 +171,11 @@ MenuItem screen_i[] =
     {DefSlider(sldr_scrsize, 0, "Screen Size"), OPT_XS,          OPT_LINE(0), 1, m_defshade, 0, NULL, NULL, NULL},//, MNU_BorderCheck},
     {DefInert(0, NULL), OPT_XSIDE,                               OPT_LINE(0), 0, m_defshade, 0, NULL, NULL, NULL},
 
+#ifdef MISTER_HYBRID
+    // MiSTer: no Border Tile and Panel Scale, they are for high resolutions
+    {DefSlider(sldr_brightness, KEYSC_B, "Brightness"), OPT_XS,  OPT_LINE(1), 1, m_defshade, 0, NULL, NULL, NULL},
+    {DefInert(0, NULL), OPT_XSIDE,                               OPT_LINE(1), 0, m_defshade, 0, NULL, NULL, NULL},
+#else
     {DefSlider(sldr_bordertile, 0, "Border Tile"), OPT_XS,       OPT_LINE(1), 1, m_defshade, 0, NULL, NULL, NULL},//, MNU_BorderCheck},
     {DefInert(0, NULL), OPT_XSIDE,                               OPT_LINE(1), 0, m_defshade, 0, NULL, NULL, NULL},
 
@@ -179,10 +184,13 @@ MenuItem screen_i[] =
 
     {DefSlider(sldr_panelscale, 0, "Panel Scale"), OPT_XS,       OPT_LINE(3), 1, m_defshade, 0, NULL, NULL, NULL},
     {DefInert(0, NULL), OPT_XSIDE,                               OPT_LINE(3), 0, m_defshade, 0, NULL, NULL, NULL},
+#endif
 
 #if USE_POLYMOST && USE_OPENGL
     {DefButton(btn_texfilter, 0, "Filtering"), OPT_XS,           OPT_LINE(5), 1, m_defshade, 0, NULL, MNU_TexFilterCheck, NULL},
 #endif
+#ifndef MISTER_HYBRID
+    // MiSTer: the video mode is the Resolution option of the core's menu
     {DefSlider(sldr_videodisplay, 0, "Display"), OPT_XS,         OPT_LINE(6), 1, m_defshade, 0, NULL, NULL, NULL},
     {DefInert(0, NULL), OPT_XSIDE,                               OPT_LINE(6), 0, m_defshade, 0, NULL, NULL, NULL},
     {DefSlider(sldr_videobpp, 0, "Colour"), OPT_XS,              OPT_LINE(7), 1, m_defshade, 0, NULL, NULL, NULL},
@@ -190,6 +198,7 @@ MenuItem screen_i[] =
     {DefSlider(sldr_videores, 0, "Resolution"), OPT_XS,          OPT_LINE(8), 1, m_defshade, 0, NULL, NULL, NULL},
     {DefInert(0, NULL), OPT_XSIDE,                               OPT_LINE(8), 0, m_defshade, 0, NULL, NULL, NULL},
     {DefOption(0, "Apply Settings"), OPT_XSIDE,                 OPT_LINE(10), 1, m_defshade, 0, MNU_ApplyVideoModeSettings, NULL, NULL},
+#endif
     {DefNone}
     };
 
@@ -200,8 +209,13 @@ MenuItem mouse_i[] =
     {DefSlider(sldr_mouse, 0, "Mouse Speed"), OPT_XS,            OPT_LINE(0), 1, m_defshade, 0, NULL, MNU_MouseCheck, NULL},
     {DefInert(0, NULL), OPT_XSIDE,                               OPT_LINE(0), 0, m_defshade, 0, NULL, NULL, NULL},    // Blank line for mouse
 
+#ifdef MISTER_HYBRID
+    // MiSTer: no Mouse Aiming, the mouse always looks up and down
+    {DefButton(btn_mouse_invert, 0, "Invert Mouse"), OPT_XS,     OPT_LINE(1), 1, m_defshade, 0, NULL, MNU_MouseCheck, NULL},
+#else
     {DefButton(btn_mouse_aim, 0, "Mouse Aiming"), OPT_XS,        OPT_LINE(1), 1, m_defshade, 0, NULL, MNU_MouseCheck, NULL},
     {DefButton(btn_mouse_invert, 0, "Invert Mouse"), OPT_XS,     OPT_LINE(2), 1, m_defshade, 0, NULL, MNU_MouseCheck, NULL},
+#endif
     {DefNone}
     };
 
@@ -240,7 +254,11 @@ MenuItem mousesetup_i[] =
     };
 MenuGroup mousesetupgroup = {65, 5, "^Mouse Buttons", mousesetup_i, pic_newgametitl, 0, m_defshade, NULL, NULL, 0};
 
+#ifdef MISTER_HYBRID
+#define MAXJOYSTICKBUTTONPAGES 2
+#else
 #define MAXJOYSTICKBUTTONPAGES 4
+#endif
 static char JoystickButtonFunctions[MAXJOYBUTTONS][2][MAXFUNCTIONLENGTH];
 static int JoystickButtonPage = 0;
 static BOOL MNU_JoystickButtonsInitialise(MenuItem_p item);
@@ -249,6 +267,42 @@ static BOOL MNU_JoystickButtonPostProcess(MenuItem_p item);
 static BOOL MNU_JoystickButtonSetupCustom(UserCall call, MenuItem_p item);
 static BOOL MNU_JoystickButtonNextPage(void);
 MenuGroup joybuttonsgroup = {0, 0, NULL, NULL, 0, 0, m_defshade, MNU_JoystickButtonSetupCustom, NULL, 0};
+#ifdef MISTER_HYBRID
+// MiSTer: the buttons of the core by the names its menu has for them ("J1,"
+// in jfSW.sv of jfSW_MiSTer), in the places the engine gives them
+// (MISTERJOY_* in sdlayer.h), and the d-pad
+#define MISTER_JOYBUTTON(line, name, button) \
+        {DefLayer(0, name, &joybuttonsgroup),                      OPT_XS, OPT_LINE(line), 1, m_defshade, button, NULL, NULL, MNU_JoystickButtonPostProcess}, \
+        {DefInert(0, JoystickButtonFunctions[button][0]),       OPT_XSIDE, OPT_LINE(line), 1, m_defshade, button, NULL, MNU_SetJoystickButtonFunctions, NULL}
+MenuItem joybuttons_i[MAXJOYSTICKBUTTONPAGES][20] =
+    {
+        {
+        MISTER_JOYBUTTON(0, "Fire", 2),
+        MISTER_JOYBUTTON(1, "Open", 3),
+        MISTER_JOYBUTTON(2, "Jump", 4),
+        MISTER_JOYBUTTON(3, "Crouch", 5),
+        MISTER_JOYBUTTON(4, "Next Weapon", 6),
+        MISTER_JOYBUTTON(5, "Use Item", 7),
+        MISTER_JOYBUTTON(6, "Map", 8),
+        MISTER_JOYBUTTON(7, "Menu", 9),
+
+        {DefInert(0, "Page 1 / 2"),                          OPT_XS, OPT_LINE(10), 1, m_defshade, 0, NULL, NULL, NULL },
+        {DefOption(0, "Next..."),                         OPT_XSIDE, OPT_LINE(10), 1, m_defshade, 0, MNU_JoystickButtonNextPage, NULL, NULL },
+        {DefNone}
+        },
+
+        {
+        MISTER_JOYBUTTON(0, "Dpad up", joybutton_DpadUp),
+        MISTER_JOYBUTTON(2, "Dpad down", joybutton_DpadDown),
+        MISTER_JOYBUTTON(4, "Dpad left", joybutton_DpadLeft),
+        MISTER_JOYBUTTON(6, "Dpad right", joybutton_DpadRight),
+
+        {DefInert(0, "Page 2 / 2"),                          OPT_XS, OPT_LINE(10), 1, m_defshade, 0, NULL, NULL, NULL },
+        {DefOption(0, "Next..."),                         OPT_XSIDE, OPT_LINE(10), 1, m_defshade, 0, MNU_JoystickButtonNextPage, NULL, NULL },
+        {DefNone}
+        },
+    };
+#else
 MenuItem joybuttons_i[MAXJOYSTICKBUTTONPAGES][20] =
     {
         {
@@ -339,6 +393,7 @@ MenuItem joybuttons_i[MAXJOYSTICKBUTTONPAGES][20] =
         {DefNone}
         },
     };
+#endif
 MenuGroup joybuttonssetupgroup = {65, 5, "^Cont'ler Setup", joybuttons_i[0], pic_newgametitl, 0, m_defshade, NULL, NULL, 0};
 
 static char JoystickAxisName[64];
@@ -355,8 +410,11 @@ MenuItem joyaxes_i[] =
     {
     {DefInert(0, JoystickAxisName), OPT_XS, OPT_LINE(0), 1, MENU_SHADE_INACTIVE, 0, NULL, NULL, NULL},
 
+#ifndef MISTER_HYBRID
+    // MiSTer: the scale is the stick sensitivity of the core's menu
     {DefSlider(sldr_joyaxisscale, 0, "Axis Scale"),     OPT_XS, OPT_LINE(2), 1, m_defshade, 0, NULL, NULL, NULL},
     {DefInert(0, NULL),                              OPT_XSIDE, OPT_LINE(2), 0, m_defshade, 0, NULL, NULL, NULL},
+#endif
     {DefButton(btn_joyaxis_invert, 0, "Invert"),        OPT_XS, OPT_LINE(3), 1, m_defshade, 0, NULL, NULL, NULL},
     {DefSlider(sldr_joyaxisanalog, 0, "Analog"),        OPT_XS, OPT_LINE(4), 1, m_defshade, 0, NULL, NULL, NULL},
     {DefInert(0, NULL),                              OPT_XSIDE, OPT_LINE(4), 0, m_defshade, 0, NULL, NULL, NULL},
