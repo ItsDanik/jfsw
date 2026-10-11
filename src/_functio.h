@@ -200,6 +200,64 @@ static char * keydefaults_modern[] =
    };
 
 
+#ifdef MISTER_HYBRID
+// The modern scheme of the hybrid core, and its default: WASD with the mouse,
+// the arrows and the right Ctrl for a keyboard alone
+static char * keydefaults_mister[] =
+   {
+   "Move_Forward", "W", "Up",
+   "Move_Backward", "S", "Down",
+   "Turn_Left", "Left", "",
+   "Turn_Right", "Right", "",
+   "Strafe", "LAlt", "RAlt",
+   "Fire", "RCtrl", "",
+   "Open", "E", "",
+   "Run", "LShift", "RShift",
+   "AutoRun", "CapLck", "",
+   "Jump", "Space", "",
+   "Crouch", "LCtrl", "",
+   "Look_Up", "PgUp", "",
+   "Look_Down", "PgDn", "",
+   "Strafe_Left", "A", "",
+   "Strafe_Right", "D", "",
+   "Aim_Up", "Home", "",
+   "Aim_Down", "End", "",
+   "Weapon_1", "1", "",
+   "Weapon_2", "2", "",
+   "Weapon_3", "3", "",
+   "Weapon_4", "4", "",
+   "Weapon_5", "5", "",
+   "Weapon_6", "6", "",
+   "Weapon_7", "7", "",
+   "Weapon_8", "8", "",
+   "Weapon_9", "9", "",
+   "Weapon_10", "0", "",
+   "Inventory", "F", "Enter",
+   "Inventory_Left", "[", "",
+   "Inventory_Right", "]", "",
+   "Med_Kit", "M", "",
+   "Smoke_Bomb", "B", "",
+   "Night_Vision", "N", "",
+   "Gas_Bomb", "G", "",
+   "Flash_Bomb", "V", "",
+   "Caltrops", "C", "",
+   "TurnAround", "BakSpc", "",
+   "SendMessage", "T", "",
+   "Map", "Tab", "",
+   "Shrink_Screen", "-", "",
+   "Enlarge_Screen", "=", "",
+   "Center_View", "KPad5", "",
+   "Holster_Weapon", "H", "",
+   "Map_Follow_Mode", "L", "",
+   "See_Co_Op_View", "K", "",
+   "Mouse_Aiming", "U", "",
+   "Toggle_Crosshair", "I", "",
+   "Next_Weapon", "R", "",
+   "Previous_Weapon", "Q", "",
+   "Show_Console", "NumLck", "",
+   };
+#endif
+
 static char * mousedefaults[MAXMOUSEBUTTONS] =
    {
    "Fire",

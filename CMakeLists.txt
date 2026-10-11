@@ -72,6 +72,8 @@ add_executable(jfsw
 	${AUDIO}/midi.c
 	${AUDIO}/driver_nosound.c
 	${AUDIO}/driver_sdl.c
+	${AUDIO}/driver_misterfm.c
+	${AUDIO}/gmtimbre.c
 	${AUDIO}/asssys.c
 
 	src/actor.c

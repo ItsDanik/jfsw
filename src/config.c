@@ -232,8 +232,14 @@ void CONFIG_SetDefaults( void )
    Bstrcpy(WangBangMacro[8], MACRO9);
    Bstrcpy(WangBangMacro[9], MACRO10);
 
+#ifdef MISTER_HYBRID
+   // the modern scheme (WASD and the mouse) is the default of the hybrid core
+   CONFIG_SetDefaultKeyDefinitions(CONFIG_DEFAULTS_MODERN);
+   CONFIG_SetMouseDefaults(CONFIG_DEFAULTS_MODERN);
+#else
    CONFIG_SetDefaultKeyDefinitions(CONFIG_DEFAULTS_CLASSIC);
    CONFIG_SetMouseDefaults(CONFIG_DEFAULTS_CLASSIC);
+#endif
    CONFIG_SetJoystickDefaults(CONFIG_DEFAULTS_CLASSIC);
 
    memset(MouseDigitalAxes, -1, sizeof(MouseDigitalAxes));
@@ -274,8 +280,13 @@ void CONFIG_SetDefaultKeyDefinitions(int style)
    int i, f, k1, k2;
 
    if (style) {
+#ifdef MISTER_HYBRID
+      numkeydefaults = sizeof(keydefaults_mister) / sizeof(char *) / 3;
+      keydefaultset = keydefaults_mister;
+#else
       numkeydefaults = sizeof(keydefaults_modern) / sizeof(char *) / 3;
       keydefaultset = keydefaults_modern;
+#endif
    } else {
       numkeydefaults = sizeof(keydefaults) / sizeof(char *) / 3;
       keydefaultset = keydefaults;
