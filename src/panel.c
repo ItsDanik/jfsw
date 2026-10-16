@@ -301,6 +301,11 @@ PlayerUpdateHealth(PLAYERp pp, short value)
         }
 
     if (TEST(pp->Flags, PF_DEAD))
+#ifdef MISTER_HYBRID
+        // MiSTer: but drawn again as it is, when the status bar is drawn over
+        // the view every frame (240 lines, draw.c)
+        if (!(rotatesprite_viewcover && value == 0))
+#endif
         return;
 
     if (value < 0)

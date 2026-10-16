@@ -1636,6 +1636,19 @@ void MiSTer_UpdateOptions(void)
     // The left stick moves the player as an axis: its d-pad presses (turning,
     // at a full tilt) only count in menus.
     setjoystickdpad(UsingMenus);
+
+    // 240 lines: the HUD margin, the status bar over the view (border.c)
+    {
+    int hud = MiSTer_HudBottom(ydim);
+    int cover = ydim > 200 && gs.BorderNum == BORDER_BAR ? tilesizy[STATUS_BAR] + hud : 0;
+
+    if (hud != rotatesprite_hudbottom || cover != rotatesprite_viewcover)
+        {
+        rotatesprite_hudbottom = hud;
+        rotatesprite_viewcover = cover;
+        SetRedrawScreen(Player + myconnectindex);
+        }
+    }
     }
 #endif
 
@@ -2404,6 +2417,19 @@ drawscreen(PLAYERp pp)
         pFlushPerms(pp);
         SetBorder(pp,gs.BorderNum);
         }
+#ifdef MISTER_HYBRID
+    // MiSTer, 240 lines: the view goes on behind the status bar, which is
+    // drawn over it every frame (the bar and its numbers are drawn after the
+    // view, MiSTer_UpdateOptions())
+    else if (rotatesprite_viewcover && pp == Player + myconnectindex)
+        {
+        PANEL_SPRITEp psp = pSpawnFullScreenSprite(pp, STATUS_BAR, PRI_BACK, 0, 200 - tilesizy[STATUS_BAR]);
+        SET(psp->flags, PANF_NON_MASKED|PANF_SCALE_BOTTOM);
+        PlayerUpdatePanelInfo(Player + screenpeek);
+        // the compass is drawn when it turns, the bar has an N of its own
+        RedrawCompass = TRUE;
+        }
+#endif
 
     PreUpdatePanel();
 

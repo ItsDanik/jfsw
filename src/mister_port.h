@@ -25,6 +25,21 @@ void MiSTer_HorizLimits(int centre, int *min, int *max);
 // Once per frame, between two frames: follows the OSD options that apply
 // while the game runs (draw.c)
 void MiSTer_UpdateOptions(void);
+// 240 lines (hybrid/CLAUDE.md, "240 lines and HUD margins"): the lines
+// between the status bar (or the mini bar) and the bottom edge, the OSD's
+// HUD (Bottom); 0 on a screen of 200 lines. The HUD line of the OSD is
+// greyed out there (`lines` is the screen's height).
+int MiSTer_HudBottom(int lines);
+
+// Cheats page of the OSD: God Mode and No Clipping on (1) or off (0), and
+// the triggers (MH_OSDTriggers(), T[56] and T[57]) selected since the last
+// call. MiSTer_Cheats() (cheats.c) applies them once a frame while a level is
+// played.
+int MiSTer_CheatGodMode(void);
+int MiSTer_CheatNoClip(void);
+enum { MISTER_CHEAT_GIVEALL = 1, MISTER_CHEAT_NEXTLEVEL = 2 };
+int MiSTer_CheatTriggers(void);
+void MiSTer_Cheats(void);
 
 // In app_main(), before the engine is started
 void MiSTer_Init(void);
@@ -35,21 +50,20 @@ void MiSTer_AddSearchPaths(void);
 void MiSTer_Loading(void);
 
 struct grpfile;
-// After ScanGroups(): with more than one game in the folder the player picks
-// one on the screen. Returns the game to start, `selected` if there is nothing
-// to pick; quits if the player leaves the list.
+// After ScanGroups(): the game to start (MH_PickGame()), the one of the
+// core's menu entry, or the player's pick from a list of those that are there
+// when the core was started by itself. Quits after a message when it is not
+// there, or when the player leaves the list.
 struct grpfile const *MiSTer_SelectGroup(struct grpfile const *selected);
 // No GRP file: tells the player which files to copy where
 void MiSTer_NoGameData(void);
 
-// Before the game starts: lets the player pick one of several data sets on
-// the screen. Returns the index, -1 to quit
-int MiSTer_PickGame(const char *const *names, int count, int selected);
-// Problems the player can fix (missing data): shown on the screen until a
-// button is pressed, in plain words that say which files go where
+// Problems the player can fix (missing data): shown on the core's purple
+// screen until the player leaves the core, in plain words that say which
+// files go where
 void MiSTer_ShowError(const char *message);
 // Exit code of the process after the player quit: the launcher starts the
-// game again (back to the list of MiSTer_PickGame, or because the core was
+// game again (back to the game list, or because the core was
 // loaded again) or returns to the menu
 int MiSTer_ExitCode(void);
 

@@ -164,6 +164,10 @@ SetConsoleDmost(VOID)
     //
 
     ystart = f_ydim - Y_TO_FIXED(BAR_HEIGHT);
+#ifdef MISTER_HYBRID
+    // MiSTer: the bar is the HUD margin above the bottom edge
+    ystart -= FIXED(rotatesprite_hudbottom, 0);
+#endif
 
     if (ydim == 480 && gs.BorderNum == 2)
         adj = 1;
@@ -318,6 +322,10 @@ BorderShade(PLAYERp pp, BOOL refresh)
         wx2 = min(wx2, xdim - 1);
         wy1 = max(wy1, 0);
         wy2 = min(wy2, MSW(f_ydim - mulscale16(Y_TO_FIXED(BAR_HEIGHT), PanelScale)) - 1);
+#ifdef MISTER_HYBRID
+        // MiSTer: the bar is the HUD margin above the bottom edge
+        wy2 = min(wy2, MSW(f_ydim - mulscale16(Y_TO_FIXED(BAR_HEIGHT), PanelScale)) - 1 - rotatesprite_hudbottom);
+#endif
 
         DrawBorderShade(pp, lines, wx1, wy1, wx2, wy2);
         // increase view size by one - dont do a set view though
@@ -446,6 +454,14 @@ VOID BorderSetView(PLAYERp pp, int *Xdim, int *Ydim, int *ScreenSize)
     // figure out the viewing window x and y dimensions
     xd = f_xdim - X_TO_FIXED(b->Xdim);
     yd = f_ydim - mulscale16(Y_TO_FIXED(b->Ydim), PanelScale);
+#ifdef MISTER_HYBRID
+    // MiSTer, more than 200 lines: the status bar is the HUD margin above
+    // the bottom edge. With the bar alone the view goes on behind it to the
+    // bottom edge (drawn over every frame, drawscreen()); a smaller view
+    // with a border stays above it.
+    if (ydim > 200 && gs.BorderNum >= BORDER_BAR)
+        yd = gs.BorderNum == BORDER_BAR ? f_ydim : yd - FIXED(rotatesprite_hudbottom, 0);
+#endif
     sc = f_xdim - X_TO_FIXED(b->ScreenSize);
     *Xdim = MSW(xd);
     *Ydim = MSW(yd);
@@ -521,6 +537,12 @@ BorderRefresh(PLAYERp pp)
 
         y = 0;
         y2 = MSW_ROUND(f_ydim - mulscale16(Y_TO_FIXED(b->Ydim), PanelScale));
+#ifdef MISTER_HYBRID
+        // MiSTer: the border also below the bar, which is the HUD margin
+        // above the bottom edge, drawn over it
+        if (rotatesprite_hudbottom)
+            y2 = ydim;
+#endif
 
         DrawBorder(pp, x, y, x2, y2);
 

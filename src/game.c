@@ -716,11 +716,13 @@ TerminateGame(VOID)
     //uninitkeys();
     KB_Shutdown();
 
-    uninitengine();
-    TermSetup();
-
+    // The sound first: its thread still mixes sounds from the engine's
+    // cache, which uninitengine() frees (a crash at exit, now and then)
     //Terminate3DSounds();                // Kill the sounds linked list
     UnInitSound();
+
+    uninitengine();
+    TermSetup();
 
     uninittimer();
 
@@ -3135,6 +3137,7 @@ RunLevel(VOID)
         OSD_DispatchQueued();
 #ifdef MISTER_HYBRID
         MiSTer_UpdateOptions();
+        MiSTer_Cheats();
 #endif
 
         if (quitevent)

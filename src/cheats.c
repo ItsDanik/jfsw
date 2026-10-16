@@ -34,6 +34,11 @@ Prepared for public release: 03/28/2005 - Charlie Wiederhold, 3D Realms
 
 #include "control.h"
 #include "function.h"
+#ifdef MISTER_HYBRID
+#include "cache1d.h"
+#include "demo.h"
+#include "mister_port.h"
+#endif
 //#include "inv.h"
 
 
@@ -479,3 +484,67 @@ void CheatInput(void)
     }
 
 */
+
+#ifdef MISTER_HYBRID
+// The Cheats page of the core's OSD (core/jfSW.sv): God Mode and No Clipping
+// hold while they are on (the game's own cheat codes still work while they
+// are off), the triggers do their thing once each time. Once a frame while a
+// level is played.
+void MiSTer_Cheats(void)
+    {
+    extern BOOL FinishedLevel;
+    static int lastgod = -1, lastclip = -1;
+    PLAYERp pp = Player + myconnectindex;
+    int god = MiSTer_CheatGodMode();
+    int clip = MiSTer_CheatNoClip();
+    int triggers = MiSTer_CheatTriggers();
+
+    if (CommEnabled || DemoMode || DemoPlaying)
+        return;
+
+    if (god != lastgod || god)
+        {
+        if (god != lastgod)
+            {
+            sprintf(ds, "GOD MODE %s", god ? "ON" : "OFF");
+            PutStringInfo(pp, ds);
+            }
+        GodMode = god;
+        lastgod = god;
+        }
+    if (clip != lastclip || clip)
+        {
+        if (clip)
+            SET(pp->Flags, PF_CLIP_CHEAT);
+        else if (clip != lastclip)
+            RESET(pp->Flags, PF_CLIP_CHEAT);
+        if (clip != lastclip)
+            {
+            sprintf(ds, "NO CLIP MODE %s", clip ? "ON" : "OFF");
+            PutStringInfo(pp, ds);
+            }
+        lastclip = clip;
+        }
+
+    if (triggers & MISTER_CHEAT_GIVEALL)
+        ItemCheat(pp, "");
+    if (triggers & MISTER_CHEAT_NEXTLEVEL)
+        {
+        // as an exit switch without a level of its own: the next one, with
+        // the bonus screen, when there is a next one
+        int fil = -1;
+
+        if (Level + 1 <= MAX_LEVELS && LevelInfo[Level + 1].LevelName)
+            fil = kopen4load(LevelInfo[Level + 1].LevelName, 0);
+        if (fil >= 0)
+            {
+            kclose(fil);
+            Level++;
+            ExitLevel = TRUE;
+            FinishedLevel = TRUE;
+            }
+        else
+            PutStringInfo(pp, "THIS IS THE LAST LEVEL");
+        }
+    }
+#endif
