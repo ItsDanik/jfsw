@@ -133,18 +133,18 @@ struct MiSTerGame {
 static const struct MiSTerGame Games[] = {
     { GRPFILE_GAME_REG, "SW", "Shadow Warrior", NULL,
       "Shadow Warrior was not found. Copy SW.GRP of version 1.2 (the full game or the "
-      "shareware) to %s/ on the SD card." },
+      "shareware) to %s/." },
     { GRPFILE_GAME_SHARE, "SWS", "Shadow Warrior Shareware", "SW", NULL },
     { GRPFILE_GAME_WD, "WT", "SW: Wanton Destruction", NULL,
-      "Wanton Destruction was not found. Copy WT.GRP to %s/ or to its addons/ folder "
-      "on the SD card." },
+      "Wanton Destruction was not found. Copy WT.GRP to %s/ or to the addons/ "
+      "folder in it." },
     { GRPFILE_GAME_TD, "TD", "SW: Twin Dragon", NULL,
       "Twin Dragon was not found. It needs TD.GRP (version 1.2) and SW.GRP of the full "
-      "game: copy them to %s/ on the SD card (TD.GRP may go in addons/ there)." },
+      "game: copy them to %s/ (TD.GRP may go in addons/ there)." },
 };
 #define NUM_GAMES (int)(sizeof(Games) / sizeof(Games[0]))
 #define NO_GAME "No game data found. Copy SW.GRP of Shadow Warrior (the full game or the " \
-    "shareware) to %s/ on the SD card, and WT.GRP or TD.GRP for the addons."
+    "shareware) to %s/, and WT.GRP or TD.GRP for the addons."
 
 #define MAX_GAMES 16
 
