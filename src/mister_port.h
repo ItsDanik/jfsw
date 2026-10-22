@@ -48,6 +48,9 @@ void MiSTer_Init(void);
 void MiSTer_AddSearchPaths(void);
 // "Loading..." on the screen, until the game shows its first frame
 void MiSTer_Loading(void);
+// A file's name as it is in the game's folder or its search paths, in
+// whatever case (the CD tracks: Track02.ogg for the game's track02.ogg)
+void MiSTer_FileCase(char *name, int size);
 
 struct grpfile;
 // After ScanGroups(): the game to start (MH_PickGame()), the one of the

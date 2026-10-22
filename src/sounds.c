@@ -35,6 +35,9 @@ Prepared for public release: 03/28/2005 - Charlie Wiederhold, 3D Realms
 #include "cd.h"
 #include "util_lib.h"
 #include "gamedefs.h"
+#ifdef MISTER_HYBRID
+#include "mister_port.h"
+#endif
 #include "config.h"
 
 
@@ -461,6 +464,9 @@ PlaySong(char *song_file_name, int cdaudio_track, BOOL loop, BOOL restart)
             {
                 numPos[0] = '0' + (cdaudio_track / 10) % 10;
                 numPos[1] = '0' + cdaudio_track % 10;
+#ifdef MISTER_HYBRID
+                MiSTer_FileCase(oggtrack, sizeof(oggtrack));
+#endif
 
                 if (LoadSong(oggtrack)) {
                     if (loop)

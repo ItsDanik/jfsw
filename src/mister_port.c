@@ -5,6 +5,7 @@
 #include <mister_hybrid.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
 #include "build.h"
@@ -101,15 +102,50 @@ void MiSTer_ShowError(const char *message)
         MH_UI_Message(TITLE, message, MH_UI_WAIT | MH_UI_ERROR);
 }
 
+// Where the game looks for its files besides its folder
+static const char *const SearchDirs[] = { "addons", "music", "classic/MUSIC" };
+#define NUM_SEARCH_DIRS (int)(sizeof(SearchDirs) / sizeof(SearchDirs[0]))
+
 void MiSTer_AddSearchPaths(void)
 {
-    static const char *const dirs[] = { "addons", "music", "classic/MUSIC" };
-    unsigned i;
+    int i;
 
-    for (i = 0; i < sizeof(dirs) / sizeof(dirs[0]); i++) {
-        if (access(dirs[i], F_OK) == 0)
-            addsearchpath(dirs[i]);
+    for (i = 0; i < NUM_SEARCH_DIRS; i++) {
+        if (access(SearchDirs[i], F_OK) == 0)
+            addsearchpath(SearchDirs[i]);
     }
+}
+
+void MiSTer_FileCase(char *name, int size)
+{
+    CACHE1D_FIND_REC *found;
+    char *path;
+
+    if (findfrompath(name, &path) == 0) {
+        free(path);
+        return;
+    }
+    if (strchr(name, '/') != NULL)
+        return;
+    found = klistpath("/", name, CACHE1D_FIND_FILE);
+    if (found != NULL)
+        snprintf(name, size, "%s", found->name);
+    klistfree(found);
+}
+
+// The path from the game's folder of a GRP file the scan found by its name,
+// in the folder or one of the search dirs; 0 if it is in none of them
+static int GroupPath(const char *name, char *path, size_t size)
+{
+    int i;
+
+    snprintf(path, size, "%s", name);
+    for (i = 0; access(path, F_OK) != 0; i++) {
+        if (i == NUM_SEARCH_DIRS)
+            return 0;
+        snprintf(path, size, "%s/%s", SearchDirs[i], name);
+    }
+    return 1;
 }
 
 void MiSTer_Loading(void)
@@ -164,9 +200,10 @@ struct grpfile const *MiSTer_SelectGroup(struct grpfile const *selected)
     mh_game games[MAX_GAMES + NUM_GAMES];
     struct grpfile const *of[MAX_GAMES + NUM_GAMES];
     static const char *const none[] = { NULL };
+    static char paths[MAX_GAMES][BMAX_PATH];
+    static const char *files[MAX_GAMES][2];
     int seen[NUM_GAMES] = { 0 };
     int count = 0, n = 0, i, g, registered = 0, listed = 0, pick;
-    char text[MH_MSG_COLS + 1];
 
     (void)selected;
     // the versions and addons the game knows, each once, in the order of the
@@ -185,12 +222,19 @@ struct grpfile const *MiSTer_SelectGroup(struct grpfile const *selected)
         if (grp->game == GRPFILE_GAME_REG)
             registered = 1;
     }
-    // those, as found (no files to look for); an addon only with the full game
+    // those, as found, their GRP file the one to look for (for the lines
+    // under the game's logo: "Checking Game Data...", "Game Data OK"); an
+    // addon only with the full game
     for (i = 0; i < count; i++) {
         mh_game game = { found[i]->ref->name, found[i]->ref->name, none, NULL, NULL };
 
         if ((found[i]->game & GRPFILE_ADDON) && !registered)
             continue;
+        if (GroupPath(found[i]->name, paths[n], sizeof(paths[n]))) {
+            files[n][0] = paths[n];
+            files[n][1] = NULL;
+            game.files = files[n];
+        }
         for (g = 0; g < NUM_GAMES; g++) {
             if ((found[i]->game & ~GRPFILE_ADDON) == Games[g].game && !seen[g]) {
                 seen[g] = 1;
@@ -218,10 +262,8 @@ struct grpfile const *MiSTer_SelectGroup(struct grpfile const *selected)
     if (pick < 0 || of[pick] == NULL)
         exit(0);
     PickedFromList = listed;
-    if (MH_Open()) {
-        snprintf(text, sizeof(text), "Loading %s...", games[pick].name);
-        MH_UI_Message(TITLE, text, 0);
-    }
+    // the game's logo and the lines under it ("Loading <name>..." the last)
+    // come with the pick (MH_GameLogo(), host version 17)
     return of[pick];
 }
 
