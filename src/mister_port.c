@@ -150,8 +150,7 @@ static int GroupPath(const char *name, char *path, size_t size)
 
 void MiSTer_Loading(void)
 {
-    if (MH_Open())
-        MH_UI_Message(TITLE, "Loading...", 0);
+    MH_Open();
 }
 
 // The games with a menu entry of their own (package/games.txt), and the

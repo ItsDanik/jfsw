@@ -46,7 +46,9 @@ void MiSTer_Init(void);
 // The folders of a copy of "Shadow Warrior Classic Redux" (Steam, GOG) that
 // have the addons and the music, so that the whole game folder can be copied
 void MiSTer_AddSearchPaths(void);
-// "Loading..." on the screen, until the game shows its first frame
+// The core opened before the games are looked for; nothing on its screen of
+// our own: the data check's lines and "Loading" come with the pick
+// (MH_PickGame(), host version 17, the same in every core)
 void MiSTer_Loading(void);
 // A file's name as it is in the game's folder or its search paths, in
 // whatever case (the CD tracks: Track02.ogg for the game's track02.ogg)
